@@ -1,8 +1,14 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+<<<<<<< HEAD
 *.py[cod]
 *$py.class
 
+=======
+!*.py[cod]
+!*$py.class
+!*.sh
+>>>>>>> 7a9ca40 (update .gitignore)
 # C extensions
 *.so
 
@@ -136,3 +142,16 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+<<<<<<< HEAD
+=======
+
+# images
+images/*.jpg
+
+# json
+Segmented/*.json
+
+# xlsx
+*.xlsx
+
+>>>>>>> 7a9ca40 (update .gitignore)
