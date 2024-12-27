@@ -155,19 +155,20 @@ cython_debug/
 *.xlsx
 
 # Images
-Images
+Images/*.jpg
 
 # 停用词表
 停用词表
 
 # bonito_output
-bonito_output
+bonito_output/*.json
 
 # Data_clean
 Data_clean
 
 # img_process
-img_process
+img_process/*.jpg
+
 
 
 # Segmented
