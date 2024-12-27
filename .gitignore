@@ -146,10 +146,10 @@ cython_debug/
 =======
 
 # images
-images/*.jpg
+*.jpg
 
 # json
-Segmented/*.json
+*.json
 
 # xlsx
 *.xlsx
