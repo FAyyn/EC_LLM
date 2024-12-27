@@ -154,4 +154,24 @@ cython_debug/
 # xlsx
 *.xlsx
 
+# Images
+Images
+
+# 停用词表
+停用词表
+
+# bonito_output
+bonito_output
+
+# Data_clean
+Data_clean
+
+# img_process
+img_process
+
+
+# Segmented
+Segmented
+
+
 >>>>>>> 7a9ca40 (update .gitignore)
