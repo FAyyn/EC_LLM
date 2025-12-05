@@ -4,14 +4,13 @@ import torch
 import multiprocessing
 from transformers import BertTokenizer, BertModel
 from sklearn.metrics.pairwise import cosine_similarity
-from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 
 # 设置多进程启动方式为 'spawn'
 multiprocessing.set_start_method('spawn', force=True)
 
 # 检查是否有GPU可用
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # 初始化模型和Tokenizer（BERT）
@@ -19,7 +18,7 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
 bert_model = BertModel.from_pretrained('bert-base-chinese').to(device)  # 将BERT模型移到GPU
 
 # 目标目录和输出目录
-target_directory = '/workspace/SRC'
+target_directory = '/workspace/SRC/CCER'
 output_directory = '/workspace/DataProcess/Segmented'
 
 # 确保输出目录存在
@@ -30,7 +29,7 @@ if not os.path.exists(output_directory):
 total_files = sum(len(files) for _, _, files in os.walk(target_directory)) - 1  # 减1是因为最后一个统计的是空文件夹
 
 # 设置批量大小
-batch_size = 8  # 可以根据GPU显存调整
+batch_size = 64  # 可以根据GPU显存调整
 
 # 全角转半角函数
 def fullwidth_to_halfwidth(text):
@@ -62,13 +61,12 @@ def cosine_sim(embedding1, embedding2):
     return cosine_similarity(embedding1, embedding2)[0][0]
 
 # 合并相似的句子，并确保每个段落不超过2048个字
-def merge_sentences(sentences, similarity_threshold=0.65, max_length=2048):
+def merge_sentences(sentences, similarity_threshold=0.6, max_length=2048):
     merged_paragraphs = []
     current_paragraph = [] 
     current_paragraph_length = 0  # 当前段落的字数
 
-    # 为句子处理添加进度条
-    for i, sentence in tqdm(enumerate(sentences), desc='Merging sentences', total=len(sentences)):
+    for i, sentence in enumerate(sentences):
         # 计算当前句子的字数
         sentence_length = len(sentence)
 
@@ -115,20 +113,7 @@ def process_file(file_path):
     # 将全角字符转换为半角字符
     merged_paragraphs = [fullwidth_to_halfwidth(paragraph) for paragraph in merged_paragraphs]
 
-    # 初始化文件特定的输出数据结构
-    segmented_data = []
-
-    # 将分段后的内容添加到文件输出数据结构中
-    for index, text in enumerate(merged_paragraphs):
-        segmented_data.append({'text': text.strip(), 'index': index})
-
-    # 构建输出文件的路径
-    output_file_name = os.path.splitext(os.path.basename(file_path))[0] + '_segmented.json'
-    output_file_path = os.path.join(output_directory, output_file_name)
-
-    # 保存分段后的内容到输出文件
-    with open(output_file_path, 'w', encoding='utf-8') as out_f:
-        json.dump(segmented_data, out_f, ensure_ascii=False, indent=4)
+    return merged_paragraphs  # 返回处理后的段落（没有编号）
 
 # 使用并行处理多个文件
 def process_files_in_parallel():
@@ -139,9 +124,29 @@ def process_files_in_parallel():
             if file.endswith('_content_list.json'):
                 file_paths.append(os.path.join(root, file))
 
+    all_paragraphs = []  # 用来存储所有文件处理后的段落
+    total_files_count = len(file_paths)
+    processed_files_count = 0  # 已处理的文件数量
+
     # 使用ThreadPoolExecutor并行处理文件
     with ThreadPoolExecutor() as executor:
-        list(tqdm(executor.map(process_file, file_paths), desc="Processing files", total=len(file_paths)))
+        for result in executor.map(process_file, file_paths):
+            all_paragraphs.extend(result)  # 合并每个文件的段落
+            processed_files_count += 1  # 每处理一个文件，已处理的文件数加1
+            
+            # 显示整体的完成度
+            completion_percentage = (processed_files_count / total_files_count) * 100
+            print(f"文件处理进度: {processed_files_count}/{total_files_count} ({completion_percentage:.2f}%)")
+
+    # 为所有段落统一编号
+    all_segmented_data = []
+    for new_index, text in enumerate(all_paragraphs):
+        all_segmented_data.append({'text': text.strip(), 'index': new_index})
+
+    # 将所有合并的段落输出到一个JSON文件
+    output_file_path = os.path.join(output_directory, 'CCER.json')
+    with open(output_file_path, 'w', encoding='utf-8') as out_f:
+        json.dump(all_segmented_data, out_f, ensure_ascii=False, indent=4)
 
 if __name__ == "__main__":
     process_files_in_parallel()

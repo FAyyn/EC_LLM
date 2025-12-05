@@ -1,7 +1,7 @@
 import json
 import random
 
-def random_sample_json_and_remove(input_file, output_file, remaining_file, sample_fraction=0.3):
+def random_sample_json_and_remove(input_file, output_file, remaining_file, sample_fraction=0.33):
     # 读取目标 JSON 文件
     with open(input_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -32,7 +32,7 @@ def random_sample_json_and_remove(input_file, output_file, remaining_file, sampl
         json.dump(remaining_data, f, ensure_ascii=False, indent=4)
 
 # 示例使用
-input_file = '/workspace/DataProcess/bonito_output/synthetic_qa_dataset_segmented_reshape_qwen.json'
-output_file = '/workspace/DataProcess/bonito_output/synthetic_qa_dataset_segmented_reshape_qwen_test.json'
-remaining_file = '/workspace/DataProcess/bonito_output/synthetic_qa_dataset_segmented_reshape_qwen_train.json'
+input_file = '/workspace/wnp/carbon_questions_instruction_150.json'
+output_file = '/workspace/wnp/carbon_questions_instruction_150_test.json'
+remaining_file = '/workspace/wnp/carbon_questions_instruction_100.json'
 random_sample_json_and_remove(input_file, output_file, remaining_file)
