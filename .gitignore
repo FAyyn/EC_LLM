@@ -160,11 +160,6 @@ Images/
 # 停用词表
 停用词表/
 
-# bonito_output
-bonito_output/
-
-# Data_clean
-Data_clean/
 
 # img_process
 img_process/
@@ -174,5 +169,17 @@ img_process/
 # Segmented
 Segmented/
 
+
+Datasets/
+
+tie_output/
+
+ec_causal_dpo/
+
+bonito_output/
+
+Eval/
+
+*.xlsx
 
 >>>>>>> 7a9ca40 (update .gitignore)
